@@ -1,0 +1,27 @@
+{{- if and .Values.aksConnector.enabled .Values.aksConnector.acdIdentifier }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-config
+  namespace: {{ required "namespace is missing" .Values.namespace }}
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-weight: "4"
+    helm.sh/hook-delete-policy: hook-succeeded
+data:
+  {{ if not .Values.secret.enabled -}}
+  # ---------------------------------------------------------------------------
+  # Credentials.
+  # ---------------------------------------------------------------------------
+  spotinst.token: {{ required "spotinst.token is missing" .Values.spotinst.token }}
+  spotinst.account: {{ required "spotinst.account is missing" .Values.spotinst.account }}
+  {{ end -}}
+  # ---------------------------------------------------------------------------
+  # Configuration.
+  # ---------------------------------------------------------------------------
+  spotinst.cluster-identifier: {{ required "spotinst.clusterIdentifier is missing" .Values.spotinst.clusterIdentifier }}
+  base-url: {{ default "" .Values.spotinst.baseUrl | quote }}
+  proxy-url: {{ default "" .Values.spotinst.proxyUrl | quote }}
+  disable-auto-update: {{ default "false" .Values.spotinst.disableAutoUpdate | quote }}
+  enable-csr-approval: {{ default "false" .Values.spotinst.enableCsrApproval | quote }}
+{{- end }}
